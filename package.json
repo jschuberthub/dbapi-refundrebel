@@ -4,7 +4,7 @@
   "main": "src/index.js",
   "type": "module",
   "scripts": {
-    "start": "node src/index.js",
+    "start": "node --max-old-space-size=4096 src/index.js",
     "dev": "nodemon src/index.js",
     "build": "echo 'No build step required for this project'",
     "test": "echo 'No tests specified'",
