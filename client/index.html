@@ -1,0 +1,371 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Refundrebel Train Tracker - Deutsche Bahn</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="icon" type="image/x-icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🚆</text></svg>">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <i class="fas fa-train"></i>
+                    <h1>Refundrebel Train Tracker</h1>
+                </div>
+                <p class="subtitle">Real-time Deutsche Bahn train information</p>
+            </div>
+        </header>
+
+        <!-- Search Section -->
+        <section class="search-section">
+            <div class="search-container">
+                <div class="search-group">
+                    <label for="stationSearch">
+                        <i class="fas fa-search"></i>
+                        Station
+                    </label>
+                    <input 
+                        type="text" 
+                        id="stationSearch" 
+                        placeholder="Enter station name (e.g., Berlin Hbf, München Hbf)"
+                        autocomplete="off"
+                    >
+                    <div id="searchSuggestions" class="suggestions"></div>
+                </div>
+                
+                <div class="time-group">
+                    <label for="timeWindow">
+                        <i class="fas fa-clock"></i>
+                        Time Window
+                    </label>
+                    <select id="timeWindow">
+                        <option value="60" selected>1 hour</option>
+                        <option value="120">2 hours</option>
+                        <option value="180">3 hours</option>
+                        <option value="240">4 hours</option>
+                        <option value="300">5 hours</option>
+                    </select>
+                </div>
+                
+                <button id="searchBtn" class="search-btn">
+                    <i class="fas fa-search"></i>
+                    Search Trains
+                </button>
+            </div>
+
+            <!-- Filters Section -->
+            <div class="filters-container">
+                <div class="filters-header">
+                    <h3><i class="fas fa-filter"></i> Filters</h3>
+                    <button id="toggleFilters" class="toggle-filters-btn">
+                        <i class="fas fa-chevron-down"></i>
+                        Show Filters
+                    </button>
+                </div>
+                
+                <div id="filtersContent" class="filters-content" style="display: none;">
+                    <div class="filters-grid">
+                        <!-- Train Type Filters -->
+                        <div class="filter-group">
+                            <label class="filter-label" for="filterICE">
+                                <i class="fas fa-train"></i>
+                                Train Types
+                            </label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterICE" value="ICE" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">ICE</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterEC" value="EC" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">EC</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterIR" value="IR" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">IR</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterRE" value="RE" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">RE</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterRB" value="RB" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">RB</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Delay Filters -->
+                        <div class="filter-group">
+                            <label class="filter-label" for="filterOnTime">
+                                <i class="fas fa-clock"></i>
+                                Delay Status
+                            </label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterOnTime" value="on-time" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">On Time</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterDelayed" value="delayed" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">Delayed</span>
+                                </label>
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterEarly" value="early" checked>
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">Early</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Platform Filters -->
+                        <div class="filter-group">
+                            <label class="filter-label" for="filterPlatform">
+                                <i class="fas fa-map-marker-alt"></i>
+                                Platform
+                            </label>
+                            <div class="platform-filters">
+                                <label class="checkbox-item">
+                                    <input type="checkbox" id="filterPlatform" value="platform">
+                                    <span class="checkbox-custom"></span>
+                                    <span class="checkbox-label">Show only trains with platform info</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <!-- Direction Filter -->
+                        <div class="filter-group">
+                            <label class="filter-label" for="directionFilter">
+                                <i class="fas fa-route"></i>
+                                Direction
+                            </label>
+                            <input 
+                                type="text" 
+                                id="directionFilter" 
+                                placeholder="Filter by destination (e.g., Berlin, Hamburg)"
+                                class="direction-input"
+                            >
+                        </div>
+                    </div>
+
+                    <!-- Filter Actions -->
+                    <div class="filter-actions">
+                        <button id="clearFilters" class="clear-filters-btn">
+                            <i class="fas fa-times"></i>
+                            Clear All Filters
+                        </button>
+                        <button id="applyFilters" class="apply-filters-btn">
+                            <i class="fas fa-check"></i>
+                            Apply Filters
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Loading State -->
+        <div id="loading" class="loading" style="display: none;">
+            <div class="spinner"></div>
+            <p>Loading...</p>
+        </div>
+
+        <!-- Error State -->
+        <div id="error" class="error" style="display: none;">
+            <i class="fas fa-exclamation-triangle"></i>
+            <p>An error occurred. Please try again.</p>
+        </div>
+
+        <!-- Empty State -->
+        <div id="emptyState" class="empty-state">
+            <i class="fas fa-train"></i>
+            <h3>Welcome to Refundrebel Train Tracker</h3>
+            <p>Search for any German train station to see real-time departures and arrivals.</p>
+            <p class="small">Powered by Deutsche Bahn API</p>
+        </div>
+
+        <!-- Results Section -->
+        <div id="results" class="results" style="display: none;">
+            <!-- Station Info -->
+            <div class="station-info">
+                <h2 id="stationName">Station Name</h2>
+                <p id="stationDetails">Loading station details...</p>
+            </div>
+
+            <!-- Tabs -->
+            <div class="tabs" role="tablist">
+                <button class="tab-btn active" data-tab="departures" role="tab" aria-selected="true" aria-controls="departuresPane">
+                    <i class="fas fa-arrow-up"></i>
+                    Departures
+                    <span class="count" id="departuresCount">0</span>
+                </button>
+                <button class="tab-btn" data-tab="arrivals" role="tab" aria-selected="false" aria-controls="arrivalsPane">
+                    <i class="fas fa-arrow-down"></i>
+                    Arrivals
+                    <span class="count" id="arrivalsCount">0</span>
+                </button>
+            </div>
+
+            <!-- Tab Content -->
+            <div class="tab-content">
+                <!-- Departures Tab -->
+                <div id="departuresPane" class="tab-pane active" role="tabpanel" aria-labelledby="departures-tab">
+                    <div class="trains-list" id="departuresList">
+                        <!-- Departures will be populated here -->
+                    </div>
+                </div>
+
+                <!-- Arrivals Tab -->
+                <div id="arrivalsPane" class="tab-pane" role="tabpanel" aria-labelledby="arrivals-tab">
+                    <div class="trains-list" id="arrivalsList">
+                        <!-- Arrivals will be populated here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <div class="footer-content">
+                <p>&copy; 2025 Refundrebel Train Tracker. Powered by Deutsche Bahn API.</p>
+                <div class="footer-links">
+                    <a href="#" onclick="showAbout()">About</a>
+                    <a href="#" onclick="showPrivacy()">Privacy</a>
+                    <a href="#" onclick="showHelp()">Help</a>
+                </div>
+            </div>
+        </footer>
+    </div>
+
+    <!-- About Modal -->
+    <div id="aboutModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>About Refundrebel Train Tracker</h3>
+                <button class="modal-close" onclick="closeModal('aboutModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Refundrebel Train Tracker is a modern web application that provides real-time train information for German railway stations using the official Deutsche Bahn API.</p>
+                <h4>Features:</h4>
+                <ul>
+                    <li>Real-time departures and arrivals</li>
+                    <li>Station search with autocomplete</li>
+                    <li>Delay information and platform details</li>
+                </ul>
+                <h4>Technology:</h4>
+                <p>Built with Node.js, Express, and vanilla JavaScript. Uses the db-vendo-client library for Deutsche Bahn API integration.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Help Modal -->
+    <div id="helpModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>How to Use</h3>
+                <button class="modal-close" onclick="closeModal('helpModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <h4>Searching for Stations:</h4>
+                <ol>
+                    <li>Type the station name in the search box</li>
+                    <li>Use arrow keys to navigate suggestions</li>
+                    <li>Press Enter or click to select a station</li>
+                </ol>
+                <h4>Viewing Trains:</h4>
+                <ul>
+                    <li>Switch between Departures and Arrivals tabs</li>
+                    <li>Adjust the time window to see more or fewer trains</li>
+                    <li>Click on any train for more details</li>
+                </ul>
+                <h4>Understanding the Display:</h4>
+                <ul>
+                    <li><span class="delay on-time">On time</span> - Train is running on schedule</li>
+                    <li><span class="delay delayed">+5 min</span> - Train is delayed</li>
+                    <li><span class="delay early">-2 min</span> - Train is early</li>
+                    <li><span class="platform">12</span> - Platform number</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+
+    <!-- Privacy Modal -->
+    <div id="privacyModal" class="modal" style="display: none;">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>Privacy Policy</h3>
+                <button class="modal-close" onclick="closeModal('privacyModal')">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>Refundrebel Train Tracker respects your privacy and does not collect or store any personal information.</p>
+                <h4>Data Usage:</h4>
+                <ul>
+                    <li>No personal data is collected or stored</li>
+                    <li>Station searches are processed in real-time</li>
+                    <li>No cookies or tracking mechanisms are used</li>
+                    <li>All data comes directly from Deutsche Bahn API</li>
+                </ul>
+                <h4>Third-Party Services:</h4>
+                <p>This application uses the Deutsche Bahn API to provide train information. Please refer to Deutsche Bahn's privacy policy for information about their data handling practices.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="app.js"></script>
+    <script>
+        // Modal functions
+        function showAbout() {
+            document.getElementById('aboutModal').style.display = 'flex';
+        }
+        
+        function showHelp() {
+            document.getElementById('helpModal').style.display = 'flex';
+        }
+        
+        function showPrivacy() {
+            document.getElementById('privacyModal').style.display = 'flex';
+        }
+        
+        function closeModal(modalId) {
+            document.getElementById(modalId).style.display = 'none';
+        }
+        
+        // Close modal when clicking outside
+        document.addEventListener('click', (e) => {
+            if (e.target.classList.contains('modal')) {
+                e.target.style.display = 'none';
+            }
+        });
+        
+        // Close modal with Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                const modals = document.querySelectorAll('.modal');
+                modals.forEach(modal => {
+                    if (modal.style.display === 'flex') {
+                        modal.style.display = 'none';
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html> 

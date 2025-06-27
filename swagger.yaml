@@ -1,0 +1,345 @@
+openapi: 3.0.0
+info:
+  title: Refundrebel Train API
+  description: |
+    API for searching German train stations and getting real-time departure/arrival information.
+    Built for the Refundrebel Dev Challenge.
+    
+    This API provides access to Deutsche Bahn data through the transport.rest service,
+    filtered to show only ICE, IC, EC, IR, RE, and RB trains (no S-Bahn, U-Bahn, or buses).
+  version: 1.0.0
+  contact:
+    name: Refundrebel Dev Challenge
+servers:
+  - url: http://localhost:3000/api
+    description: Development server
+  - url: https://your-production-url.com/api
+    description: Production server
+
+paths:
+  /stations:
+    get:
+      summary: Search for train stations
+      description: Search for German train stations by name with autocomplete functionality
+      parameters:
+        - name: query
+          in: query
+          required: true
+          description: Station name to search for
+          schema:
+            type: string
+            example: "Berlin"
+        - name: limit
+          in: query
+          required: false
+          description: Maximum number of results (1-50)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 50
+            default: 10
+            example: 10
+      responses:
+        '200':
+          description: Successful station search
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  data:
+                    type: array
+                    items:
+                      type: object
+                      properties:
+                        id:
+                          type: string
+                          description: Station ID
+                          example: "8011113"
+                        name:
+                          type: string
+                          description: Station name
+                          example: "Berlin Südkreuz"
+                        city:
+                          type: string
+                          description: City name
+                          example: "Berlin"
+                        latitude:
+                          type: number
+                          description: Latitude coordinate
+                          example: 52.47623
+                        longitude:
+                          type: number
+                          description: Longitude coordinate
+                          example: 13.365863
+                        products:
+                          type: object
+                          description: Available transport products
+                  count:
+                    type: integer
+                    description: Number of stations found
+                    example: 5
+                  query:
+                    type: string
+                    description: Original search query
+                    example: "Berlin"
+        '400':
+          description: Bad request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Query parameter is required"
+                  message:
+                    type: string
+                    example: "Please provide a search query for station name"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to search stations"
+                  message:
+                    type: string
+                    example: "DB API error: 500 Internal Server Error"
+
+  /station/{id}/departures:
+    get:
+      summary: Get departures and arrivals for a station
+      description: |
+        Get real-time departure and arrival information for a specific station.
+        Only shows ICE, IC, EC, IR, RE, and RB trains (no S-Bahn, U-Bahn, or buses).
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: Station ID
+          schema:
+            type: string
+            example: "8011113"
+        - name: minutes
+          in: query
+          required: false
+          description: Time window in minutes (1-1440)
+          schema:
+            type: integer
+            minimum: 1
+            maximum: 1440
+            default: 60
+            example: 60
+      responses:
+        '200':
+          description: Successful departure/arrival data
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  success:
+                    type: boolean
+                    example: true
+                  stationId:
+                    type: string
+                    description: Station ID
+                    example: "8011113"
+                  duration:
+                    type: integer
+                    description: Time window in minutes
+                    example: 60
+                  departures:
+                    type: array
+                    description: List of departures
+                    items:
+                      type: object
+                      properties:
+                        tripId:
+                          type: string
+                          description: Trip identifier
+                          example: "1|1168945|24|80|1052020"
+                        direction:
+                          type: string
+                          description: Destination direction
+                          example: "München Hbf"
+                        line:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "ice-1601"
+                            name:
+                              type: string
+                              example: "ICE 1601"
+                            product:
+                              type: string
+                              example: "nationalExpress"
+                            mode:
+                              type: string
+                              example: "train"
+                        when:
+                          type: string
+                          format: date-time
+                          description: Actual departure/arrival time
+                          example: "2024-01-15T14:37:00+01:00"
+                        plannedWhen:
+                          type: string
+                          format: date-time
+                          description: Scheduled departure/arrival time
+                          example: "2024-01-15T14:35:00+01:00"
+                        delay:
+                          type: integer
+                          description: Delay in seconds (negative = early)
+                          example: 120
+                        platform:
+                          type: string
+                          description: Actual platform
+                          example: "3"
+                        plannedPlatform:
+                          type: string
+                          description: Scheduled platform
+                          example: "3"
+                        stop:
+                          type: object
+                          properties:
+                            id:
+                              type: string
+                              example: "8011113"
+                            name:
+                              type: string
+                              example: "Berlin Südkreuz"
+                        remarks:
+                          type: array
+                          description: Additional information
+                          items:
+                            type: object
+                  arrivals:
+                    type: array
+                    description: List of arrivals
+                    items:
+                      $ref: '#/components/schemas/Train'
+                  departuresCount:
+                    type: integer
+                    description: Number of departures
+                    example: 12
+                  arrivalsCount:
+                    type: integer
+                    description: Number of arrivals
+                    example: 8
+                  timestamp:
+                    type: string
+                    format: date-time
+                    description: API response timestamp
+                    example: "2024-01-15T13:30:00.000Z"
+        '400':
+          description: Bad request - missing or invalid parameters
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Station ID is required"
+                  message:
+                    type: string
+                    example: "Please provide a valid station ID"
+        '500':
+          description: Internal server error
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Failed to fetch departures and arrivals"
+                  message:
+                    type: string
+                    example: "DB API error: 500 Internal Server Error"
+
+  /health:
+    get:
+      summary: Health check
+      description: Check if the API is running
+      responses:
+        '200':
+          description: API is healthy
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  status:
+                    type: string
+                    example: "OK"
+                  message:
+                    type: string
+                    example: "Refundrebel Train API is running!"
+
+components:
+  schemas:
+    Train:
+      type: object
+      properties:
+        tripId:
+          type: string
+          description: Trip identifier
+        direction:
+          type: string
+          description: Destination direction
+        line:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+            product:
+              type: string
+            mode:
+              type: string
+        when:
+          type: string
+          format: date-time
+          description: Actual time
+        plannedWhen:
+          type: string
+          format: date-time
+          description: Scheduled time
+        delay:
+          type: integer
+          description: Delay in seconds
+        platform:
+          type: string
+          description: Actual platform
+        plannedPlatform:
+          type: string
+          description: Scheduled platform
+        stop:
+          type: object
+          properties:
+            id:
+              type: string
+            name:
+              type: string
+        remarks:
+          type: array
+          items:
+            type: object
+
+tags:
+  - name: Stations
+    description: Station search operations
+  - name: Departures
+    description: Departure and arrival information
+  - name: Health
+    description: API health check 

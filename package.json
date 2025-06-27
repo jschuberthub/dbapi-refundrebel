@@ -1,0 +1,30 @@
+{
+  "name": "dbapi-refundrebel",
+  "version": "1.0.0",
+  "main": "src/index.js",
+  "type": "module",
+  "scripts": {
+    "start": "node src/index.js",
+    "dev": "nodemon src/index.js",
+    "build": "echo 'No build step required for this project'",
+    "test": "echo 'No tests specified'",
+    "lint": "echo 'No linter configured'"
+  },
+  "keywords": ["train", "api", "deutsche-bahn", "transport", "refundrebel"],
+  "author": "Refundrebel Dev Challenge",
+  "license": "MIT",
+  "description": "Refundrebel Dev Challenge - Train station search and departure/arrival display using Deutsche Bahn API",
+  "engines": {
+    "node": ">=18.0.0"
+  },
+  "dependencies": {
+    "express": "^4.18.2",
+    "cors": "^2.8.5",
+    "swagger-ui-express": "^5.0.0",
+    "yamljs": "^0.3.0",
+    "db-vendo-client": "^6.8.2"
+  },
+  "devDependencies": {
+    "nodemon": "^3.0.1"
+  }
+}
